@@ -6,20 +6,24 @@ services:
     restart: always
     volumes:
       - ${WEBAPP_STORAGE_HOME}/site/wwwroot/bitwarden:/home
-    entrypoint: ["/usr/bin/dumb-init","--"]        # 从1.26.0版本开始需要删除此行entrypoint
     command: ["/home/bitwarden.sh"]
     environment:                                   # 环境变量配置完成必须删除所有中文注释，否则无法保存
       - I_REALLY_WANT_VOLATILE_STORAGE=true        # 从1.25.1版本开始需要加上此环境变量，否则无法启动
-      - WEBSOCKET_ENABLED=true                     # 启用websocket，用于推送密码变化
       - SIGNUPS_ALLOWED=true                       # 允许注册新用户，设置为false则禁止新注册
       - WEB_VAULT_ENABLED=true                     # 用户web页面，设置为false则关闭
-      - ADMIN_TOKEN=your_web_admin_panel_password  # web管理员页面的密码，不设置则关闭管理面板，详细请阅读README
+      - ADMIN_TOKEN=your_web_admin_panel_password  # web管理员页面的密码，不设置则关闭管理面板，详细请阅读README.md
       - DOMAIN=https://your_domain                 # 域名设置，免费F1计划域名格式为https://xxx.azurewebsites.net
-      - REALTIME_BAK_CYCLE=10                      # 定时备份间隔分钟数，需要能被60整除，设置为0则关闭所有备份（包括FTP备份）
-      - DAILY_BAK_COUNTS=5                         # FTP每日备份的保留份数，每天北京时间0时备份
-      - FTP_URL=ftp://your_ftp_url/your_folder/    # FTP备份地址，必须以/结尾，否则会出现错误。不设置本项则禁用远程FTP备份
-      - FTP_USER=your_ftp_username                 # FTP用户名，不启用远程FTP备份可以不设置
-      - FTP_PASS=your_ftp_password                 # FTP密码，不启用远程FTP备份可以不设置
+      - PUSH_ENABLED=true                          # 启用移动端实时推送，密码变化后实时自动同步。禁用请删除本行。详细请阅读README.md
+      - PUSH_INSTALLATION_ID=your_id               # 移动端实时推送API的ID。禁用请删除本行。
+      - PUSH_INSTALLATION_KEY=your_key             # 移动端实时推送API的KEY。禁用请删除本行。
+      - REALTIME_BAK_CYCLE=10                      # 定时备份间隔分钟数，需要能被60整除，设置为0则关闭所有备份（包括FTP/WebDAV备份）
+      - DAILY_BAK_COUNTS=5                         # FTP/WebDAV每日备份的保留份数，每天北京时间0时备份
+      - FTP_URL=ftp://your_ftp_url/your_folder/    # FTP备份地址，必须以/结尾，否则会出现错误。禁用远程FTP备份须删除本行。
+      - FTP_USER=your_ftp_username                 # FTP用户名。禁用远程FTP备份请删除本行。
+      - FTP_PASS=your_ftp_password                 # FTP密码。禁用远程FTP备份请删除本行。
+      - WebDAV_URL=http://webdav_url/your_folder/  # WebDAV备份地址，必须以/结尾，否则会出现错误。禁用远程WebDAV备份须删除本行。
+      - WebDAV_USER=your_webdav_username           # WebDAV用户名。禁用远程WebDAV备份请删除本行。
+      - WebDAV_PASS=your_webdav_password           # WebDAV密码。禁用远程WebDAV备份请删除本行。
 
   nginx:
     image: nginx:alpine

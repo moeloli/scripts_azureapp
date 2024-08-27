@@ -8,27 +8,26 @@ if [ "$1" = "nginx" ]; then
 
     ## 生成vhost配置
     mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
-    echo '
-upstream  rocket  {
-    server   bitwarden:80;
+    echo $'
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    \'\'      "";
 }
-upstream  ws  {
-    server   bitwarden:3012;
+upstream  rocket  {
+    zone vaultwarden-default 64k;
+    server   bitwarden:80;
+    keepalive 2;
 }
 server {
     listen       80;
     listen  [::]:80;
 
-    location /notifications/hub/negotiate {
-        proxy_pass http://rocket;
-    }
-    location /notifications/hub {
-        proxy_pass http://ws;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
     location /
     {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
         proxy_pass http://rocket;
         proxy_set_header  Host              $host;
         proxy_set_header  X-Real-IP         $remote_addr;
@@ -91,12 +90,16 @@ while [ $REALTIME_BAK_CYCLE -gt 0 ]; do
     if [ $daily_count -gt 0 ]; then
         daily_count=$(($daily_count-1))
     else
-        mv /home/backup_realtime/bitwarden_backup_realtime_$TIME.tar.gz /home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz
+        cp /home/backup_realtime/bitwarden_backup_realtime_$TIME.tar.gz /home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz
         find /home/backup_daily/ -mtime +$((${DAILY_BAK_COUNTS}-1)) -delete
         daily_count=$((1440/$REALTIME_BAK_CYCLE-1))
         if [ -n "$FTP_URL" ]; then
-            curl $FTP_URL -u "$FTP_USER:$FTP_PASS" -T "/home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz"
-            curl $FTP_URL -u "$FTP_USER:$FTP_PASS" -X "DELE bitwarden_backup_daily_$(date -d @$((`date +%s` +3600*8-86400*$DAILY_BAK_COUNTS )) "+%Y%m%d").tar.gz"
+            curl "$FTP_URL" -u "$FTP_USER:$FTP_PASS" -T "/home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz"
+            curl "$FTP_URL" -u "$FTP_USER:$FTP_PASS" -X "DELE bitwarden_backup_daily_$(date -d @$((`date +%s` +3600*8-86400*$DAILY_BAK_COUNTS )) "+%Y%m%d").tar.gz"
+        fi
+        if [ -n "$WEBDAV_URL" ]; then
+            curl -u "$WEBDAV_USER:$WEBDAV_PASS" -T "/home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz" "${WEBDAV_URL}"
+            curl -u "$WEBDAV_USER:$WEBDAV_PASS" -X DELETE "${WEBDAV_URL}bitwarden_backup_daily_$(date -d @$((`date +%s` +3600*8-86400*$DAILY_BAK_COUNTS )) "+%Y%m%d").tar.gz"
         fi
     fi
     HOUR=`date "+%-H"`
@@ -121,15 +124,15 @@ exec "$@"' > /autobackup.sh
 
     if [ -d /etc/vaultwarden.d ]; then
         for f in /etc/vaultwarden.d/*.sh; do
-            if [ -r $f ]; then
-                . $f
+            if [ -r "${f}" ]; then
+                . "${f}"
             fi
         done
     elif [ -d /etc/bitwarden_rs.d ]; then
         echo "### You are using the old /etc/bitwarden_rs.d script directory, please migrate to /etc/vaultwarden.d ###"
         for f in /etc/bitwarden_rs.d/*.sh; do
-            if [ -r $f ]; then
-                . $f
+            if [ -r "${f}" ]; then
+                . "${f}"
             fi
         done
     fi
