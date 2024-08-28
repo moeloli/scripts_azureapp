@@ -66,6 +66,8 @@ wget -P /home/site/wwwroot/bitwarden/ https://raw.githubusercontent.com/hjh14285
 ```
 
 # ChangeLog更新记录
+* 20240828
+   * 修复Vaultwarden容器在Azure中DNS无法解析的问题。参考[Discussions 3941](https://github.com/dani-garcia/vaultwarden/discussions/3941)、[Discussions 3945](https://github.com/dani-garcia/vaultwarden/discussions/3945)、[Discussions 3967](https://github.com/dani-garcia/vaultwarden/discussions/3967)
 * 20240827
    * 新增Webdav备份方式
    * 新增支持vaultwarden新特性——移动端实时推送

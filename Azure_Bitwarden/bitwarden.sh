@@ -8,10 +8,10 @@ if [ "$1" = "nginx" ]; then
 
     ## 生成vhost配置
     mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
-    echo $'
+    echo '
 map $http_upgrade $connection_upgrade {
     default upgrade;
-    \'\'      "";
+    '\'\''      "";
 }
 upstream  rocket  {
     zone vaultwarden-default 64k;
@@ -40,6 +40,10 @@ server {
 ## bitwarden启动部分
 #elif [ "$1" = "/bitwarden_rs" ]; then
 else
+
+    ## 导入DNS服务器
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+    echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 
     ## 新建备份文件夹
     if [ ! -d "/home/backup_daily" ]; then
