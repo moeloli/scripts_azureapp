@@ -1,5 +1,5 @@
 # Description说明
-本脚本和YML配置文件用于使用Azure的免费Web应用程序搭建自己的[开源密码管理程序Vaultwarden（原Bitwarden_rs）](https://github.com/dani-garcia/vaultwarden/)服务端，并定时备份到Web应用自带的存储空间，也可以备份到远程FTP，且程序启动自动还原数据，方便使用。
+本脚本和YML配置文件用于使用Azure的免费Web应用程序搭建自己的[开源密码管理程序Vaultwarden（原Bitwarden_rs）](https://github.com/dani-garcia/vaultwarden/)服务端，并定时备份到Web应用自带的存储空间，也可以备份到远程FTP、WevDAV服务器，且程序启动自动还原数据，方便使用。
 
 #### YML的相关说明
 前八项为Vaultwarden自带的环境变量，后八项为自动备份脚本所需的变量。需要实现Vaultwarden的其他个性化设置可以参考官方[ENV列表](https://github.com/dani-garcia/vaultwarden/blob/main/.env.template)
@@ -19,9 +19,9 @@
 * FTP_URL=ftp://your_ftp_url/your_folder/    # FTP备份地址，必须以/结尾，否则会出现错误。禁用远程FTP备份须删除本行。
 * FTP_USER=your_ftp_username                 # FTP用户名。禁用远程FTP备份请删除本行。
 * FTP_PASS=your_ftp_password                 # FTP密码。禁用远程FTP备份请删除本行。
-* WebDAV_URL=http://webdav_url/your_folder/  # WebDAV备份地址，必须以/结尾，否则会出现错误。禁用远程WebDAV备份须删除本行。
-* WebDAV_USER=your_webdav_username           # WebDAV用户名。禁用远程WebDAV备份请删除本行。
-* WebDAV_PASS=your_webdav_password           # WebDAV密码。禁用远程WebDAV备份请删除本行。
+* WEBDAV_URL=http://webdav_url/your_folder/  # WebDAV备份地址，必须以/结尾，否则会出现错误。禁用远程WebDAV备份须删除本行。
+* WEBDAV_USER=your_webdav_username           # WebDAV用户名。禁用远程WebDAV备份请删除本行。
+* WEBDAV_PASS=your_webdav_password           # WebDAV密码。禁用远程WebDAV备份请删除本行。
 ```
 
 #### Backup & Restore备份与还原
@@ -32,7 +32,7 @@
 * 手动还原： 将备份文件放置到`/home/site/wwwroot/bitwarden/backup_daily`目录下并清空`backup_realtime`和`backup_daily`目录下其他所有备份，重新启动容器即可还原
 
 #### Attention注意
-* 移动端实时推送在[Bitwarden原版官网自托管页面](https://bitwarden.com/host/)申请ID和KEY。具体可以查看[VaultWarden官方Wiki](https://github.com/dani-garcia/vaultwarden/wiki/Enabling-Mobile-Client-push-notification)
+* 移动端实时推送在[Bitwarden原版官网自托管页面](https://bitwarden.com/host/)申请ID和KEY，数据区域选美国。区域选欧洲需要在yml中添加其他环境变量，具体可以查看[VaultWarden官方Wiki](https://github.com/dani-garcia/vaultwarden/wiki/Enabling-Mobile-Client-push-notification)
 * 当前免费的F1计划websocket支持最多5个连接，BUG已经解决，参考[Azure官方文档](https://docs.microsoft.com/zh-cn/azure/app-service/containers/app-service-linux-faq#web-sockets)、[Github Issue](https://github.com/MicrosoftDocs/azure-docs/issues/49245)
 * 如果需要自己注册完成后，禁止新用户注册，需要在`backup_realtime`中发现注册完成后的新备份之后，才能修改`SIGNUPS_ALLOWED`为false并重启容器
 * 用户Web页面登录页面完整打开一次需要流量为6MB左右，而免费的F1计划日限额为165MB，当日流量用完后会导致服务不可访问（403错误），且APP端可以进行绝大部分日常必须的功能（包括注册），所以可以根据自身需求考虑是否需要关闭用户Web界面
@@ -66,6 +66,9 @@ wget -P /home/site/wwwroot/bitwarden/ https://raw.githubusercontent.com/hjh14285
 ```
 
 # ChangeLog更新记录
+* 20240829
+   * 修复Webdav无法上传的问题
+   * 适配基于Debian的vaultwarden镜像，即tag为latest或仅版本号的镜像
 * 20240828
    * 修复Vaultwarden容器在Azure中DNS无法解析的问题。参考[Discussions 3941](https://github.com/dani-garcia/vaultwarden/discussions/3941)、[Discussions 3945](https://github.com/dani-garcia/vaultwarden/discussions/3945)、[Discussions 3967](https://github.com/dani-garcia/vaultwarden/discussions/3967)
 * 20240827

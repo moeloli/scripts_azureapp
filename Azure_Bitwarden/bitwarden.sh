@@ -97,11 +97,11 @@ while [ $REALTIME_BAK_CYCLE -gt 0 ]; do
         cp /home/backup_realtime/bitwarden_backup_realtime_$TIME.tar.gz /home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz
         find /home/backup_daily/ -mtime +$((${DAILY_BAK_COUNTS}-1)) -delete
         daily_count=$((1440/$REALTIME_BAK_CYCLE-1))
-        if [ -n "$FTP_URL" ]; then
+        if [ "$FTP_URL" != "" ]; then
             curl "$FTP_URL" -u "$FTP_USER:$FTP_PASS" -T "/home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz"
             curl "$FTP_URL" -u "$FTP_USER:$FTP_PASS" -X "DELE bitwarden_backup_daily_$(date -d @$((`date +%s` +3600*8-86400*$DAILY_BAK_COUNTS )) "+%Y%m%d").tar.gz"
         fi
-        if [ -n "$WEBDAV_URL" ]; then
+        if [ "$WEBDAV_URL" != "" ]; then
             curl -u "$WEBDAV_USER:$WEBDAV_PASS" -T "/home/backup_daily/bitwarden_backup_daily_${TIME:0:8}.tar.gz" "${WEBDAV_URL}"
             curl -u "$WEBDAV_USER:$WEBDAV_PASS" -X DELETE "${WEBDAV_URL}bitwarden_backup_daily_$(date -d @$((`date +%s` +3600*8-86400*$DAILY_BAK_COUNTS )) "+%Y%m%d").tar.gz"
         fi
@@ -116,7 +116,8 @@ done
 
 exec "$@"' > /autobackup.sh
     chmod a+x /autobackup.sh
-    /autobackup.sh &
+    [ -f /bin/bash ] && bash /autobackup.sh &
+    [ ! -f /bin/bash ] && sh /autobackup.sh &
 
     ## 官方docker使用的start.sh脚本，https://github.com/dani-garcia/vaultwarden/blob/main/docker/start.sh
     if [ -r /etc/vaultwarden.sh ]; then

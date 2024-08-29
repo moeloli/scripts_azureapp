@@ -21,9 +21,9 @@ services:
       - FTP_URL=ftp://your_ftp_url/your_folder/    # FTP备份地址，必须以/结尾，否则会出现错误。禁用远程FTP备份须删除本行。
       - FTP_USER=your_ftp_username                 # FTP用户名。禁用远程FTP备份请删除本行。
       - FTP_PASS=your_ftp_password                 # FTP密码。禁用远程FTP备份请删除本行。
-      - WebDAV_URL=http://webdav_url/your_folder/  # WebDAV备份地址，必须以/结尾，否则会出现错误。禁用远程WebDAV备份须删除本行。
-      - WebDAV_USER=your_webdav_username           # WebDAV用户名。禁用远程WebDAV备份请删除本行。
-      - WebDAV_PASS=your_webdav_password           # WebDAV密码。禁用远程WebDAV备份请删除本行。
+      - WEBDAV_URL=http://webdav_url/your_folder/  # WebDAV备份地址，必须以/结尾，否则会出现错误。禁用远程WebDAV备份须删除本行。
+      - WEBDAV_USER=your_webdav_username           # WebDAV用户名。禁用远程WebDAV备份请删除本行。
+      - WEBDAV_PASS=your_webdav_password           # WebDAV密码。禁用远程WebDAV备份请删除本行。
 
   nginx:
     image: nginx:alpine
