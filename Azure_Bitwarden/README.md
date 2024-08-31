@@ -2,7 +2,7 @@
 本脚本和YML配置文件用于使用Azure的免费Web应用程序搭建自己的[开源密码管理程序Vaultwarden（原Bitwarden_rs）](https://github.com/dani-garcia/vaultwarden/)服务端，并定时备份到Web应用自带的存储空间，也可以备份到远程FTP、WevDAV服务器，且程序启动自动还原数据，方便使用。
 
 #### YML的相关说明
-前八项为Vaultwarden自带的环境变量，后八项为自动备份脚本所需的变量。需要实现Vaultwarden的其他个性化设置可以参考官方[ENV列表](https://github.com/dani-garcia/vaultwarden/blob/main/.env.template)
+前一部分为Vaultwarden自带的环境变量，后一部分为自动备份脚本所需的变量。需要实现Vaultwarden的其他个性化设置可以参考官方[ENV列表](https://github.com/dani-garcia/vaultwarden/blob/main/.env.template)
 
 * Attention注意：VaultWarden请使用1.31.0及以上版本，旧版所需环境变量已删除。
 ```
@@ -14,7 +14,9 @@
 * PUSH_ENABLED=true                          # 启用移动端实时推送，密码变化后实时自动同步。禁用请删除本行。详细请阅读README.md
 * PUSH_INSTALLATION_ID=your_id               # 移动端实时推送API的ID。禁用请删除本行。
 * PUSH_INSTALLATION_KEY=your_key             # 移动端实时推送API的KEY。禁用请删除本行。
+
 * REALTIME_BAK_CYCLE=10                      # 定时备份间隔分钟数，需要能被60整除，设置为0则关闭所有备份（包括FTP/WebDAV备份）
+* REALTIME_BAK_COUNTS=30                     # 定时备份的最大保留份数，设置为0则保留24小时内不限制数量的备份
 * DAILY_BAK_COUNTS=5                         # FTP/WebDAV每日备份的保留份数，每天北京时间0时备份
 * FTP_URL=ftp://your_ftp_url/your_folder/    # FTP备份地址，必须以/结尾，否则会出现错误。禁用远程FTP备份须删除本行。
 * FTP_USER=your_ftp_username                 # FTP用户名。禁用远程FTP备份请删除本行。
@@ -26,7 +28,7 @@
 
 #### Backup & Restore备份与还原
 * 环境变量`REALTIME_BAK_CYCLE`为定时备份周期，该项必须设置成60的因数，否则可能会有BUG。若为0，则关闭所有备份功能。(eg. 若设置为12，则每小时的第12/24/36/48/60分钟进行备份)
-* 定时备份的目录为`/home/site/wwwroot/bitwarden/backup_realtime`，保留24小时内的备份，可以通过[Usage使用](#Usage使用)中步骤5的Bash或Azure Web Service提供的FTP链接，都可以看到。
+* 定时备份的目录为`/home/site/wwwroot/bitwarden/backup_realtime`，可通过环境变量`REALTIME_BAK_COUNTS`设置保留最新备份的份数，设置为0则不限制数量保留24小时内的备份，考虑到免费的F1计划空间配额是1G，在使用Send或附件等需要存储文件的功能时，需要格外注意。备份文件通过[Usage使用](#Usage使用)中步骤5的Bash或Azure Web Service提供的FTP链接，都可以查看。
 * 环境变量`DAILY_BAK_COUNTS`为FTP/WebDAV远程备份的保留份数，远程FTP/WebDAV备份每天北京时间0点进行，同时也可以在`/home/site/wwwroot/bitwarden/backup_daily`中看到
 * 启动容器时会进行自动还原操作，优先还原`/home/site/wwwroot/bitwarden/backup_realtime`目录下的最新备份，若没有则检索`/home/site/wwwroot/bitwarden/backup_daily`目录下的最新备份进行还原
 * 手动还原： 将备份文件放置到`/home/site/wwwroot/bitwarden/backup_daily`目录下并清空`backup_realtime`和`backup_daily`目录下其他所有备份，重新启动容器即可还原
@@ -66,6 +68,8 @@ wget -P /home/site/wwwroot/bitwarden/ https://raw.githubusercontent.com/hjh14285
 ```
 
 # ChangeLog更新记录
+* 20240831
+   * 新增定时备份保留份数选项，防止超出免费空间配额
 * 20240829
    * 修复Webdav无法上传的问题
    * 适配基于Debian的vaultwarden镜像，即tag为latest或仅版本号的镜像

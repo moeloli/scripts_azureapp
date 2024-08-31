@@ -90,7 +90,11 @@ sleep $realtime_sec
 while [ $REALTIME_BAK_CYCLE -gt 0 ]; do
     TIME=$(date -d @$((`date +%s` +3600*8 )) "+%Y%m%d_%H%M")
     tar -zcvf /home/backup_realtime/bitwarden_backup_realtime_$TIME.tar.gz -C / data
-    find /home/backup_realtime/ -mtime +0 -delete
+    if [ $REALTIME_BAK_COUNTS -gt 0 ]; then
+        ls -t /home/backup_realtime/bitwarden_backup_realtime_*.tar.gz | awk "NR>$REALTIME_BAK_COUNTS" | xargs rm -rf
+    else
+        find /home/backup_realtime/ -mtime +0 -delete
+    fi
     if [ $daily_count -gt 0 ]; then
         daily_count=$(($daily_count-1))
     else
