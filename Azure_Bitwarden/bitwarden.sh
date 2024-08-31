@@ -9,6 +9,8 @@ if [ "$1" = "nginx" ]; then
     ## 生成vhost配置
     mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
     echo '
+set_real_ip_from 0.0.0.0/0;
+real_ip_header X-Forwarded-For;
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '\'\''      "";

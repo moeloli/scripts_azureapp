@@ -70,6 +70,7 @@ wget -P /home/site/wwwroot/bitwarden/ https://raw.githubusercontent.com/hjh14285
 # ChangeLog更新记录
 * 20240831
    * 新增定时备份保留份数选项，防止超出免费空间配额
+   * 修复Vaultwarden获取不到真实IP的问题
 * 20240829
    * 修复Webdav无法上传的问题
    * 适配基于Debian的vaultwarden镜像，即tag为latest或仅版本号的镜像
